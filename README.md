@@ -23,4 +23,4 @@ Então os passos para ter as tabelas com o conteúdo requerido pelo professor s�
 
 * Se certificar que o banco existe: `python3 create.py`
 * Criar as tabelas: `python3 migrate.py`
-* Popular as tabelas utilizando o CSV que veio a partir do XSLX: `python3 populate.py`
+* Popular as tabelas utilizando o CSV que veio a partir do XLSX: `python3 populate.py`
