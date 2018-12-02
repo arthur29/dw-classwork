@@ -18,3 +18,9 @@ Para auxiliar caso queira subir de forma rápida o banco de dados e também um c
 
 `docker run -d -p 3306:3306 --name mysql -e MYSQL_DATABASE=dw -e MYSQL_ALLOW_EMPTY_PASSWORD=yes mysql:5.6`
 `docker run --name myadmin -d --link mysql:db -e MYSQL_ROOT_PASSWORD=`` -p 8080:80 phpmyadmin/phpmyadmin`
+
+Então os passos para ter as tabelas com o conteúdo requerido pelo professor são:
+
+* Se certificar que o banco existe: `python3 create.py`
+* Criar as tabelas: `python3 migrate.py`
+* Popular as tabelas utilizando o CSV que veio a partir do XSLX: `python3 populate.py`
