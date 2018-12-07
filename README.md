@@ -1,4 +1,4 @@
-#Trabalho de DW
+# Trabalho de DW
 
 Você vai precisar de instalar a biblioteca names,sqlalchemy e MySQL-connector-python
 Abaixo explica como instalar o virtualenv para nao poluir seu computador
