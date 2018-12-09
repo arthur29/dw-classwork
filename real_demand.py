@@ -1,0 +1,44 @@
+import os
+from datetime import date
+from sqlalchemy import *
+from sqlalchemy.orm import *
+from classes import *
+from sqlalchemy import func
+
+engine = create_engine('mysql+mysqlconnector://'+
+        os.environ.get('MYSQL_USER', 'root')+':'+
+        os.environ.get('MYSQL_PASSWORD','')+'@'+
+        os.environ.get('MYSQL_HOST','127.0.0.1')+'/dw', echo=True)
+Session = sessionmaker(bind=engine)
+session = Session()
+
+OrderFact.__table__.drop(engine)
+OrderFact.__table__.create(engine, checkfirst=True)
+
+def real_demand():
+    real_demand = session.query(
+        Order.IDPROD,
+            case([
+            (func.month(Order.DATAPED) < 4, 1),
+            (func.month(Order.DATAPED) < 7, 2),
+            (func.month(Order.DATAPED) < 10, 3)
+            ],
+            else_=4),
+            func.year(Order.DATAPED),
+        func.count(func.distinct(Order.IDPEDIDO))
+        ).group_by(
+            case([
+            (func.month(Order.DATAPED) < 4, 1),
+            (func.month(Order.DATAPED) < 7, 2),
+            (func.month(Order.DATAPED) < 10, 3)
+            ],
+            else_=4),
+            func.year(Order.DATAPED),
+            Order.IDPROD
+        ).all()
+    for demand in real_demand:
+        order = OrderFact(IDPROD = demanda[0], TRIMESTRE = demanda[1], ANO = demanda[2], DEMANDA_REAL = demanda[3])
+        session.add(order)
+    session.commit()
+
+real_demand()

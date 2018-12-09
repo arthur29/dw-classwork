@@ -39,3 +39,11 @@ class Provision(Base):
     DATAARREC = Column(Date)
     QTDE = Column(Integer)
     VALOR = column(Float)
+
+class OrderFact(Base):
+    __tablename__ = "DW_Pedido"
+    IDPROD = Column(String(length=100), ForeignKey("PRODUTO.IDPROD"), primary_key=True)
+    TRIMESTRE = Column(Integer, primary_key=True)
+    ANO = Column(Integer, primary_key=True)
+    DEMANDA_REAL=Column(Integer)
+    PROJECTED_DEMAND = Column(Float)
