@@ -49,7 +49,7 @@ def generate_orders(product_list, user_list):
     #["IDPROD","IDUSUARIO","DATAPED","QTDE","VALOR"]
     list_orders = []
     for product in product_list:
-        for year in range(2016,2017):
+        for year in range(2016,2018):
             for month in range(1,12):
                 num_elements = random.randint(1,10)
                 qtd_total = int(product[5]) * num_elements
@@ -71,6 +71,7 @@ def generate_orders(product_list, user_list):
                 item.append(qtd_total * float(str(product[4]).replace(",", "")))
                 list_orders.append(item)
     return list_orders
+
 
 def generate_provision(product_list):
     #[IDPROD, DATACOMP, DATAARREC, QTDE,VALOR]
@@ -114,8 +115,8 @@ def populate_tables():
                 IDPROD = item[0],
                 DESCRICAO = item[1],
                 VALOR = item[2],
-                PRECO = item[3],
-                DEMANDA_MEDIA = item[4])
+                PRECO = item[4],
+                DEMANDA_MEDIA = item[5])
         session.add(prod)
     order_list = generate_orders(product_list, user_list)
     #["IDPROD","IDUSUARIO","DATAPED","QTDE","VALOR"]
@@ -141,5 +142,3 @@ def populate_tables():
     print('DB was populated with success')
 
 populate_tables()
-#generate_provision(import_product_table())
-#generate_orders(import_product_table(), generate_users())
