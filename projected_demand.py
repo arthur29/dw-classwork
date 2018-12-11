@@ -4,6 +4,7 @@ from sqlalchemy import *
 from sqlalchemy.orm import *
 from classes import *
 from sqlalchemy import func
+from sqlalchemy.dialects.mysql import insert
 
 engine = create_engine('mysql+mysqlconnector://'+
         os.environ.get('MYSQL_USER', 'root')+':'+
@@ -17,34 +18,23 @@ def projected_demand():
     dp_mm_list = []
     dp_ae_list = []
     dp_rl_list = []
-    product = product_list[0]
+    for product in product_list:
 
-    xy = 0
-    cont = 0
-    x = 0
-    y = 0
-    x2 = 0
-    y2 = 0
-    for year in range(2016,2019):
-        for trim in range (1, 5):
-            if (year == 2018 and trim>1):
-                dp_ae_list.pop(0)
-                break
-            elif (not(year == 2016 and trim == 1)):
-                dp_mm_list.append(dp_mm(product[0], year, trim))
-                dp_ae_list.append(dp_ae(product[0], year, trim, dp_ae_list[-1][3]))
-                [xy, cont, x, y, x2, y2, dp_rl_actual] = dp_rl(product[0], year, trim, xy, cont, x, y, x2, y2)
-                dp_rl_list.append(dp_rl_actual)
-            else:
-                actual_demand = real_retroactive_demand(product[0], year, trim, 0)
-                [xy, cont, x, y, x2, y2] = [1.0 * actual_demand, 1, 1.0, actual_demand, 1.0, actual_demand * actual_demand]
-                dp_ae_list.append([product[0], year, trim, actual_demand])
-    print(product[0])
-    print(dp_mm_list)
-    print()
-    print(dp_ae_list)
-    print()
-    print(dp_rl_list)
+        best = [0]*3
+        for year in range(2016,2019):
+            for trim in range (1, 5):
+                if (year == 2018 and trim>1):
+                    dp_ae_list.pop(0)
+                    break
+                elif (not(year == 2016 and trim == 1)):
+                    dp_mm_list.append(dp_mm(product[0], year, trim))
+                    dp_ae_list.append(dp_ae(product[0], year, trim, dp_ae_list[-1][3]))
+                    dp_rl_list.append(dp_rl(product[0], year, trim))
+                    best = better_between_projects(dp_mm_list[-1], dp_ae_list[-1], dp_rl_list[-1], best)
+                else:
+                    actual_demand = real_retroactive_demand(product[0], year, trim, 0)
+                    [xy, cont, x, y, x2, y2] = [1.0 * actual_demand, 1, 1.0, actual_demand, 1.0, actual_demand * actual_demand]
+                    dp_ae_list.append([product[0], year, trim, actual_demand])
 
 def real_retroactive_demand(product, year, trimester, num):
     demand = None
@@ -57,6 +47,8 @@ def real_retroactive_demand(product, year, trimester, num):
         demand = session.query(OrderFact.DEMANDA_REAL).filter(OrderFact.ANO == year, OrderFact.TRIMESTRE == num, OrderFact.IDPROD == product).first()
 
     if demand is None:
+        return int(0)
+    elif demand[0] is None:
         return int(0)
     else:
         return int(demand[0])
@@ -76,16 +68,57 @@ def dp_ae(product, year, trimester, dp_minus_one):
     real_demand = real_retroactive_demand(product,year,trimester,1)
     return [product, year, trimester, alpha * real_demand + (1 - alpha) * dp_minus_one]
 
-def dp_rl(product, year, trim, xy, cont, x, y, x2, y2):
-    cont += 1
-    x += cont
-    actual_y = real_retroactive_demand(product, year, trim, 1)
-    y += actual_y
-    xy += cont * actual_y
-    x2 += cont * cont
-    y2 += actual_y * actual_y
+def dp_rl(product, year, trim):
+
+    xy = 0
+    cont = 0
+    x = 0
+    y = 0
+    x2 = 0
+    y2 = 0
+    for i in range(1,5):
+        actual_y = real_retroactive_demand(product, year, trim, 5-i)
+        if (actual_y != 0):
+            cont += i
+            x += cont
+            y += actual_y
+            xy += cont * actual_y
+            x2 += cont * cont
+            y2 += actual_y * actual_y
     beta = (cont * xy - x*y) / float(cont*x2 - x*x)
     alpha = (y/cont) - (x/cont) * beta
     dp_rl_plus_one = [product, year, trim, alpha + beta * cont]
-    return [xy, cont, x, y, x2, y2, dp_rl_plus_one]
+    return dp_rl_plus_one
+
+def better_between_projects(dp_mm, dp_ae, dp_rl, best):
+    real_demand = real_retroactive_demand(dp_mm[0],dp_mm[1], dp_mm[2],0)
+    insert_dp = 0
+    if (real_demand != 0):
+        dp = [None, None]*3
+        dp[0] = [dp_mm[3] - real_demand, dp_mm[3]]
+        dp[1] = [dp_ae[3] - real_demand, dp_ae[3]]
+        dp[2] = [dp_rl[3] - real_demand, dp_rl[3]]
+        for i in range(0,3):
+            best[i] += dp[i][0]
+        better = best[0]
+        insert_dp = dp[0][1]
+        for i in range(1,3):
+            if (best[i] < better):
+                better = best[i]
+                insert_dp = dp[i][1]
+    else:
+        dp = [0]*3
+        dp[0] = dp_mm[3]
+        dp[1] = dp_ae[3]
+        dp[2] = dp_rl[3]
+        smaller = best[0]
+        for i in range(1,3):
+            if (best[i] < smaller):
+                bigger = best[i]
+                insert_dp = dp[i]
+
+    statement = insert(OrderFact).values(IDPROD = dp_mm[0], ANO = dp_mm[1], TRIMESTRE = dp_mm[2], DEMANDA_PROJETADA = insert_dp).on_duplicate_key_update(DEMANDA_PROJETADA = insert_dp)
+    engine.execute(statement)
+    session.commit()
+    return best
 projected_demand()

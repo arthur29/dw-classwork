@@ -41,9 +41,9 @@ class Provision(Base):
     VALOR = column(Float)
 
 class OrderFact(Base):
-    __tablename__ = "DW_Pedido"
+    __tablename__ = "DW_PEDIDO"
     IDPROD = Column(String(length=100), ForeignKey("PRODUTO.IDPROD"), primary_key=True)
     ANO = Column(Integer, primary_key=True)
     TRIMESTRE = Column(Integer, primary_key=True)
     DEMANDA_REAL=Column(Integer)
-    PROJECTED_DEMAND = Column(Float)
+    DEMANDA_PROJETADA = Column(Float)

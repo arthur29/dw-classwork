@@ -12,7 +12,7 @@ engine = create_engine('mysql+mysqlconnector://'+
 Session = sessionmaker(bind=engine)
 session = Session()
 
-OrderFact.__table__.drop(engine)
+OrderFact.__table__.drop(engine, checkfirst=True)
 OrderFact.__table__.create(engine, checkfirst=True)
 
 def real_demand():
@@ -37,7 +37,7 @@ def real_demand():
             Order.IDPROD
         ).all()
     for demand in real_demand:
-        order = OrderFact(IDPROD = demanda[0], TRIMESTRE = demanda[1], ANO = demanda[2], DEMANDA_REAL = demanda[3])
+        order = OrderFact(IDPROD = demand[0], TRIMESTRE = demand[1], ANO = demand[2], DEMANDA_REAL = demand[3])
         session.add(order)
     session.commit()
 
