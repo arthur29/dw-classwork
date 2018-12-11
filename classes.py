@@ -28,7 +28,7 @@ class Order(Base):
     IDUSUARIO = Column(String(length=100), ForeignKey("USUARIO.IDUSUARIO"))
     DATAPED = Column(Date)
     QTDE = Column(Integer)
-    VALOR = column(Float)
+    VALOR = Column(Float)
 
 class Provision(Base):
     #[IDPROD, DATACOMP, DATAARREC, QTDE,VALOR]
@@ -38,7 +38,7 @@ class Provision(Base):
     DATACOMP = Column(Date)
     DATAARREC = Column(Date)
     QTDE = Column(Integer)
-    VALOR = column(Float)
+    VALOR = Column(Float)
 
 class OrderFact(Base):
     __tablename__ = "DW_PEDIDO"
