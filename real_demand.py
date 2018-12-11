@@ -25,7 +25,7 @@ def real_demand():
             ],
             else_=4),
             func.year(Order.DATAPED),
-        func.count(func.distinct(Order.IDPEDIDO))
+            func.sum(Order.QTDE)
         ).group_by(
             case([
             (func.month(Order.DATAPED) < 4, 1),
@@ -41,4 +41,5 @@ def real_demand():
         session.add(order)
     session.commit()
 
+    print (real_demand[:3])
 real_demand()
