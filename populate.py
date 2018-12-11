@@ -50,26 +50,19 @@ def generate_orders(product_list, user_list):
     list_orders = []
     for product in product_list:
         for year in range(2016,2018):
-            for month in range(1,12):
-                num_elements = random.randint(1,10)
-                qtd_total = int(product[5]) * num_elements
-                for i in range(0,num_elements-1):
+            for month in range(1,13):
+                num_elements = random.randint(1,10) #number of orders per month
+                monthly_demand = int(product[5]) #monthly mean demand
+                for i in range(0,num_elements):
                     item = []
                     item.append(product[0])
                     item.append(user_list[random.randint(0,len(user_list) - 1)][0])
                     item.append(date(year, month, random.randint(1,28)))
-                    qtd = int(random.uniform(0, qtd_total - 5*num_elements)) + 5
-                    qtd_total -= qtd
+                    random_deviation = random.randint((int(monthly_demand/10)*-1),int(monthly_demand/10))
+                    qtd = (monthly_demand/num_elements)+(random_deviation)
                     item.append(qtd)
                     item.append(qtd * float(str(product[4]).replace(",", "")))
                     list_orders.append(item)
-                item = []
-                item.append(product[0])
-                item.append(user_list[random.randint(0,len(user_list) - 1)][0])
-                item.append(date(year, month, random.randint(1,28)))
-                item.append(int(qtd_total))
-                item.append(qtd_total * float(str(product[4]).replace(",", "")))
-                list_orders.append(item)
     return list_orders
 
 
@@ -108,6 +101,7 @@ def populate_tables():
                SOBRENOME = item[2],
                SEXO = item[3])
        session.add(user)
+    session.commit()
     product_list = import_product_table()
     for item in product_list:
     #IDPROD,DESCRICAO,Valor                R$,,PRECO,DEMANDA MEDIA MENSAL
@@ -118,6 +112,7 @@ def populate_tables():
                 PRECO = item[4],
                 DEMANDA_MEDIA = item[5])
         session.add(prod)
+    session.commit()
     order_list = generate_orders(product_list, user_list)
     #["IDPROD","IDUSUARIO","DATAPED","QTDE","VALOR"]
     for item in order_list:
@@ -128,6 +123,7 @@ def populate_tables():
             QTDE = item[3],
             VALOR = item[4])
         session.add(order)
+    session.commit()
     provision_list = generate_provision(product_list)
     for item in provision_list:
     #[IDPROD, DATACOMP, DATAARREC, QTDE,VALOR]
