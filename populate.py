@@ -58,7 +58,7 @@ def generate_orders(product_list, user_list):
                     item.append(product[0])
                     item.append(user_list[random.randint(0,len(user_list) - 1)][0])
                     item.append(date(year, month, random.randint(1,28)))
-                    random_deviation = random.randint((int(monthly_demand/10)*-1),int(monthly_demand/10))
+                    random_deviation = random.randint(-4,4)
                     qtd = (monthly_demand/num_elements)+(random_deviation)
                     item.append(qtd)
                     item.append(qtd * float(str(product[4]).replace(",", "")))

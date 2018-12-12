@@ -47,3 +47,4 @@ class OrderFact(Base):
     TRIMESTRE = Column(Integer, primary_key=True)
     DEMANDA_REAL=Column(Integer)
     DEMANDA_PROJETADA = Column(Float)
+    DAM = Column(Float)
