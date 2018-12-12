@@ -45,6 +45,6 @@ class OrderFact(Base):
     IDPROD = Column(String(length=100), ForeignKey("PRODUTO.IDPROD"), primary_key=True)
     ANO = Column(Integer, primary_key=True)
     TRIMESTRE = Column(Integer, primary_key=True)
-    DEMANDA_REAL=Column(Integer)
+    DEMANDA_REAL=Column(Float)
     DEMANDA_PROJETADA = Column(Float)
     DAM = Column(Float)

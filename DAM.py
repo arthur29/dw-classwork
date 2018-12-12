@@ -3,6 +3,7 @@ from datetime import date
 from sqlalchemy import *
 from sqlalchemy.orm import *
 from classes import *
+from sqlalchemy.dialects.mysql import insert
 from collections import namedtuple
 
 engine = create_engine('mysql+mysqlconnector://'+
@@ -23,8 +24,7 @@ def absError(l):
                 abs_error=sum/(len(l)-1)
                 return abs_error
             else:
-                return sum
-
+                return sum 
     abs_error=sum/(len(l))
     return abs_error
 
@@ -34,26 +34,28 @@ def DAM():
     facts = []
 
     for i in range(0,len(list)):
-        facts.append((dict(Ano=list[i][0],Trimestre=list[i][1],ProdID=list[i][2],DR=list[i][3],DP=list[i][4])))
+        facts.append(dict(Ano=list[i][0],Trimestre=list[i][1],ProdID=list[i][2],DR=list[i][3],DP=list[i][4], DAM = None))
 
     for i in range(0,len(facts)):
         fact = facts[i]
         if fact["Ano"]==2016:
             if fact["Trimestre"]==1:
-                DAM.append(absError([fact]))
+                fact["DAM"] = absError([fact])
             elif fact["Trimestre"]==2:
-                DAM.append(absError([fact,facts[i-1]]))
+                fact["DAM"] = absError([fact,facts[i-1]])
             elif fact["Trimestre"]==3:
-                DAM.append(absError([fact,facts[i-1],facts[i-2]]))
+                fact["DAM"] = absError([fact,facts[i-1],facts[i-2]])
             elif fact["Trimestre"]==4:
-                DAM.append(absError([fact,facts[i-1],facts[i-2],facts[i-3]]))
+                fact["DAM"] = absError([fact,facts[i-1],facts[i-2],facts[i-3]])
         elif fact["Ano"]==2017:
-            DAM.append(absError([fact,facts[i-1],facts[i-2],facts[i-3]]))
+            fact["DAM"] = absError([fact,facts[i-1],facts[i-2],facts[i-3]])
         else:
-            DAM.append("")
+            fact["DAM"] = ""
+    for fact in facts:
+        statement = insert(OrderFact).values(IDPROD = fact["ProdID"], ANO = fact["Ano"], TRIMESTRE = fact["Trimestre"], DAM= fact["DAM"]).on_duplicate_key_update(DAM = fact["DAM"])
 
-    #push values to DB
-
+        engine.execute(statement)
+    session.commit()
     return DAM
 
 DAM()

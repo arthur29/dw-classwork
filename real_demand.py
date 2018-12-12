@@ -25,7 +25,7 @@ def real_demand():
             ],
             else_=4),
             func.year(Order.DATAPED),
-            func.sum(Order.QTDE)
+        func.sum(Order.QTDE)
         ).group_by(
             case([
             (func.month(Order.DATAPED) < 4, 1),
@@ -37,7 +37,7 @@ def real_demand():
             Order.IDPROD
         ).all()
     for demand in real_demand:
-        order = OrderFact(IDPROD = demand[0], TRIMESTRE = demand[1], ANO = demand[2], DEMANDA_REAL = demand[3])
+        order = OrderFact(IDPROD = demand[0], TRIMESTRE = demand[1], ANO = demand[2], DEMANDA_REAL = float(demand[3]))
         session.add(order)
     session.commit()
 
