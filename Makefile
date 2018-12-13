@@ -11,8 +11,8 @@ migrate: create
 ## populate: read PRODUTO.csv and use it to populate tables
 populate: migrate
 	@python3 populate.py
-## real_demand: populate real_demand DW
-real_demand:
+## total_orders: populate total_orders DW
+total_orders:
 	@python3 real_demand.py
 ## projected_demand: populate the projected_demand DW
 projected_demand:

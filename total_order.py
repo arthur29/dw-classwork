@@ -15,8 +15,8 @@ session = Session()
 NumOrdersFact.__table__.drop(engine, checkfirst=True)
 NumOrdersFact.__table__.create(engine, checkfirst=True)
 
-def real_demand():
-    real_demand = session.query(
+def total_orders():
+    total_orders = session.query(
         Order.IDPROD,
             case([
             (func.month(Order.DATAPED) < 4, 1),
@@ -37,7 +37,7 @@ def real_demand():
             Order.IDPROD
         ).all()
 
-    for demand in real_demand:
+    for demand in total_orders:
         time = session.query(TimeDimension).filter(TimeDimension.TRIMESTRE == demand[1], TimeDimension.ANO == demand[2]).first()
         if (time is None):
             time = TimeDimension(TRIMESTRE = demand[1], ANO = demand[2])
@@ -46,4 +46,4 @@ def real_demand():
         order = NumOrdersFact(IDPROD = demand[0], IDTEMPO = time.ID, TOTAL_PEDIDO = demand[3])
         session.add(order)
     session.commit()
-real_demand()
+total_orders()
