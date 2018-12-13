@@ -27,7 +27,6 @@ def DAM():
             func.year(Order.DATAPED),
             func.month(Order.DATAPED)
         ).all()
-
     aux_data=[] #data for standard deviation calculation
     i=0
 
@@ -47,55 +46,22 @@ def DAM():
 
             DAM.append([statistics.stdev(aux_data),
                 demand[1],
-                tri
+                tri, demand[0]
             ])
             aux_data=[]
             i=0
 
-    print (DAM[:10])
+    for dam in DAM:
+        time = session.query(TimeDimension).filter(TimeDimension.TRIMESTRE == dam[2], TimeDimension.ANO == dam[1]).first()
+        if (time is None):
+            time = TimeDimension(TRIMESTRE = dam[2], ANO = dam[1])
+            session.add(time)
+            session.commit()
+        time = session.query(TimeDimension.ID).filter(TimeDimension.TRIMESTRE == dam[2], TimeDimension.ANO == dam[1]).first()
+
+        statement = insert(InventoryControlFact). values(IDPROD = dam[3], DAM = float(dam[0]), IDTEMPO = time[0]).on_duplicate_key_update(DAM = float(dam[0]))
+        engine.execute(statement)
+        session.commit()
     return DAM
-
-    # def absError(l):
-    #     sum=0
-    #     for i in range(0,len(l)):
-    #         f=l[i]#fact
-    #         if(f["DP"]!=None):
-    #             sum+=(f["DR"]-f["DP"]) if (f["DR"]-f["DP"])>=0 else (f["DP"]-f["DR"])
-    #         else:
-    #             if(len(l)!=1):
-    #                 abs_error=sum/(len(l)-1)
-    #                 return abs_error
-    #             else:
-    #                 return sum
-    #     abs_error=sum/(len(l))
-    #     return abs_error
-
-    # list = session.query(OrderFact.ANO,OrderFact.TRIMESTRE,OrderFact.IDPROD,OrderFact.DEMANDA_REAL,OrderFact.DEMANDA_PROJETADA).all()
-    # facts = []
-    #
-    # for i in range(0,len(list)):
-    #     facts.append(dict(Ano=list[i][0],Trimestre=list[i][1],ProdID=list[i][2],DR=list[i][3],DP=list[i][4], DAM = None))
-    #
-    # for i in range(0,len(facts)):
-    #     fact = facts[i]
-    #     if fact["Ano"]==2016:
-    #         if fact["Trimestre"]==1:
-    #             fact["DAM"] = absError([fact])
-    #         elif fact["Trimestre"]==2:
-    #             fact["DAM"] = absError([fact,facts[i-1]])
-    #         elif fact["Trimestre"]==3:
-    #             fact["DAM"] = absError([fact,facts[i-1],facts[i-2]])
-    #         elif fact["Trimestre"]==4:
-    #             fact["DAM"] = absError([fact,facts[i-1],facts[i-2],facts[i-3]])
-    #     elif fact["Ano"]==2017:
-    #         fact["DAM"] = absError([fact,facts[i-1],facts[i-2],facts[i-3]])
-    #     else:
-    #         fact["DAM"] = ""
-    # for fact in facts:
-    #     statement = insert(OrderFact).values(IDPROD = fact["ProdID"], ANO = fact["Ano"], TRIMESTRE = fact["Trimestre"], DAM= fact["DAM"]).on_duplicate_key_update(DAM = fact["DAM"])
-    #
-    #     engine.execute(statement)
-    # session.commit()
-    # return DAM
 
 DAM()
