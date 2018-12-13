@@ -23,7 +23,7 @@ def populate_qtde():
             ],
             else_=4),
             func.year(Order.DATAPED),
-        func.sum(Order.QTDE)
+        func.count(Order.IDPEDIDO)
         ).group_by(
             case([
             (func.month(Order.DATAPED) < 4, 1),
