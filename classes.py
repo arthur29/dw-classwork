@@ -40,13 +40,29 @@ class Provision(Base):
     QTDE = Column(Integer)
     VALOR = Column(Float)
 
-class OrderFact(Base):
-    __tablename__ = "DW_PEDIDO"
+class TimeDimension(Base):
+    __tablename__ = "DW_DIMENSAO_TEMPO"
+    ID = Column(Integer, primary_key=True)
+    ANO = Column(Integer)
+    TRIMESTRE = Column(Integer)
+
+class NumOrdersFact(Base):
+    __tablename__ = "DW_TOTAL_PEDIDO"
     IDPROD = Column(String(length=100), ForeignKey("PRODUTO.IDPROD"), primary_key=True)
-    ANO = Column(Integer, primary_key=True)
-    TRIMESTRE = Column(Integer, primary_key=True)
-    DEMANDA_REAL=Column(Float)
+    IDTEMPO = Column(Integer, ForeignKey("DW_DIMENSAO_TEMPO.ID"), primary_key=True)
+    TOTAL_PEDIDO = Column(Float)
+
+class ProjectedDemandFact(Base):
+    __tablename__ = "DW_PROJECAO_DEMANDA"
+    IDPROD = Column(String(length=100), ForeignKey("PRODUTO.IDPROD"), primary_key=True)
+    IDTEMPO = Column(Integer, ForeignKey("DW_DIMENSAO_TEMPO.ID"), primary_key=True)
+    QTDE = Column(Integer)
     DEMANDA_PROJETADA = Column(Float)
-    NIVEL_DE_SEGURANCA = Column(Float)
-    TPA = Column(Float)
+
+class InventoryControlFact(Base):
+    __tablename__ = "DW_CONTROLE_INVENTARIO"
+    IDPROD = Column(String(length=100), ForeignKey("PRODUTO.IDPROD"), primary_key=True)
+    IDTEMPO = Column(Integer, ForeignKey("DW_DIMENSAO_TEMPO.ID"), primary_key=True)
+    NS  = Column(Float)
+    TPA = Column(Integer)
     DAM = Column(Float)

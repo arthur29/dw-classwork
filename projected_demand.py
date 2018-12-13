@@ -13,8 +13,40 @@ engine = create_engine('mysql+mysqlconnector://'+
 Session = sessionmaker(bind=engine)
 session = Session()
 
+def populate_qtde():
+    real_demand = session.query(
+        Order.IDPROD,
+            case([
+            (func.month(Order.DATAPED) < 4, 1),
+            (func.month(Order.DATAPED) < 7, 2),
+            (func.month(Order.DATAPED) < 10, 3)
+            ],
+            else_=4),
+            func.year(Order.DATAPED),
+        func.sum(Order.QTDE)
+        ).group_by(
+            case([
+            (func.month(Order.DATAPED) < 4, 1),
+            (func.month(Order.DATAPED) < 7, 2),
+            (func.month(Order.DATAPED) < 10, 3)
+            ],
+            else_=4),
+            func.year(Order.DATAPED),
+            Order.IDPROD
+        ).all()
+    for demand in real_demand:
+        time = session.query(TimeDimension).filter(TimeDimension.TRIMESTRE == demand[1], TimeDimension.ANO == demand[2]).first()
+        if (time is None):
+            time = TimeDimension(TRIMESTRE = demand[1], ANO = demand[2])
+            session.add(time)
+            session.commit()
+        time = session.query(TimeDimension).filter(TimeDimension.TRIMESTRE == time.TRIMESTRE, TimeDimension.ANO == time.ANO).first()
+        order = ProjectedDemandFact(IDPROD = demand[0], IDTEMPO = time.ID, QTDE = float(demand[3]))
+        session.add(order)
+    session.commit()
+
 def projected_demand():
-    product_list = session.query(func.distinct(OrderFact.IDPROD)).all()
+    product_list = session.query(func.distinct(ProjectedDemandFact.IDPROD)).all()
     dp_mm_list = []
     dp_ae_list = []
     dp_rl_list = []
@@ -43,10 +75,10 @@ def real_retroactive_demand(product, year, trimester, num):
     if ((trimester - num)<1):
         year = year - 1
         num = 4 + (trimester - num)
-        demand = session.query(OrderFact.DEMANDA_REAL).filter(OrderFact.ANO == year, OrderFact.TRIMESTRE == num, OrderFact.IDPROD == product).first()
     else:
         num = trimester - num
-        demand = session.query(OrderFact.DEMANDA_REAL).filter(OrderFact.ANO == year, OrderFact.TRIMESTRE == num, OrderFact.IDPROD == product).first()
+    subquery = session.query(TimeDimension.ID).filter(TimeDimension.ANO == year, TimeDimension.TRIMESTRE == num).subquery()
+    demand = session.query(ProjectedDemandFact.QTDE).filter(ProjectedDemandFact.IDTEMPO == subquery, ProjectedDemandFact.IDPROD == product).first()
 
     if demand is None:
         return int(0)
@@ -130,8 +162,17 @@ def better_between_projects(dp_mm, dp_ae, dp_rl, best):
             if (best[i] < smaller):
                 smaller = best[i]
                 insert_dp = dp[i]
-    statement = insert(OrderFact).values(IDPROD = dp_mm[0], ANO = dp_mm[1], TRIMESTRE = dp_mm[2], DEMANDA_PROJETADA = insert_dp).on_duplicate_key_update(DEMANDA_PROJETADA = insert_dp)
+
+    time = session.query(TimeDimension).filter(TimeDimension.TRIMESTRE == dp_mm[2], TimeDimension.ANO == dp_mm[1]).first()
+    if (time is None):
+        time = TimeDimension(TRIMESTRE = dp_mm[2], ANO = dp_mm[1])
+        session.add(time)
+        session.commit()
+    time = session.query(TimeDimension).filter(TimeDimension.TRIMESTRE == dp_mm[2], TimeDimension.ANO == dp_mm[1]).first()
+
+    statement = insert(ProjectedDemandFact).values(IDPROD = dp_mm[0], IDTEMPO = time.ID, DEMANDA_PROJETADA = insert_dp).on_duplicate_key_update(DEMANDA_PROJETADA = insert_dp)
     engine.execute(statement)
     session.commit()
     return best
+populate_qtde()
 projected_demand()
