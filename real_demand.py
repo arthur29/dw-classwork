@@ -25,7 +25,7 @@ def real_demand():
             ],
             else_=4),
             func.year(Order.DATAPED),
-        func.count(Order.IDPEDIDO)
+            func.sum(Order.QTDE)
         ).group_by(
             case([
             (func.month(Order.DATAPED) < 4, 1),
@@ -36,6 +36,7 @@ def real_demand():
             func.year(Order.DATAPED),
             Order.IDPROD
         ).all()
+
     for demand in real_demand:
         time = session.query(TimeDimension).filter(TimeDimension.TRIMESTRE == demand[1], TimeDimension.ANO == demand[2]).first()
         if (time is None):
