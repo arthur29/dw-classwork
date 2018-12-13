@@ -36,10 +36,23 @@ def DAM():
         i+=1
 
         if(i==3):
-            DAM.append(statistics.stdev(aux_data))
+            if(demand[2]<4):
+                tri=1
+            elif(demand[2]<7):
+                tri=2
+            elif(demand[2]<10):
+                tri=3
+            else:
+                tri=4
+
+            DAM.append([statistics.stdev(aux_data),
+                demand[1],
+                tri
+            ])
             aux_data=[]
             i=0
 
+    print (DAM[:10])
     return DAM
 
     # def absError(l):
