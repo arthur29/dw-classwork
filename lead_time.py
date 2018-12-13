@@ -15,7 +15,7 @@ engine = create_engine('mysql+mysqlconnector://'+
 Session = sessionmaker(bind=engine)
 session = Session()
 
-def arrival_time():
+def lead_time():
     product_list = session.query(Provision.IDPROD).distinct(Provision.IDPROD).all()
     for product in product_list:
         for year in range(2016,2018):
@@ -53,4 +53,4 @@ def arrival_time():
                 statement = insert(InventoryControlFact). values(IDPROD = product[0], TPA = total_time, IDTEMPO = time[0]).on_duplicate_key_update(TPA = total_time)
                 engine.execute(statement)
                 session.commit()
-arrival_time()
+lead_time()
