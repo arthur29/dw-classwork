@@ -25,7 +25,7 @@ def total_orders():
             ],
             else_=4),
             func.year(Order.DATAPED),
-            func.sum(Order.QTDE)
+            func.sum(Order.IDPEDIDO)
         ).group_by(
             case([
             (func.month(Order.DATAPED) < 4, 1),
