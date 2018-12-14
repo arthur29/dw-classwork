@@ -1,7 +1,7 @@
 .PHONY: create migrate populate real_demand projected_demand lead_time security_level dam ressuply_level
 
 ## all: create and run all targets
-all: populate real_demand projected_demand lead_time
+all: populate total_order projected_demand ressuply_level
 ## create: create the database
 create:
 	@python3 create.py
