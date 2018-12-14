@@ -79,12 +79,13 @@ def generate_provision(product_list):
            item.append(order_date)
 
            while True:
-               arrival_date = date(order_date.year, random.randint(order_date.month,min(order_date.month+3,12)), random.randint(1,28))
+               arrival_date = date(order_date.year, order_date.month, random.randint(1,28))
                if order_date < arrival_date:
                    item.append(arrival_date)
                    break
-
-           qtd = int(random.uniform(0, qtd_total - 5*num_orders)) + 5
+           qtd = 5
+           if (qtd_total - 5*num_orders > 0):
+               qtd = random.randint(0, qtd_total - 5*num_orders) + 5
            qtd_total -= qtd
            item.append(qtd)
            item.append(qtd*float(product[2]))

@@ -27,7 +27,7 @@ security_level: lead_time
 dam:
 	@python3 DAM.py
 ## ressuply_level: populate the NRS in INventoryControl DW
-ressuply_level:
+ressuply_level: lead_time dam security_level
 	@python3 ressuply_level.py
 ## help: show this message
 help:
