@@ -64,5 +64,6 @@ class InventoryControlFact(Base):
     IDPROD = Column(String(length=100), ForeignKey("PRODUTO.IDPROD"), primary_key=True)
     IDTEMPO = Column(Integer, ForeignKey("DW_DIMENSAO_TEMPO.ID"), primary_key=True)
     NS  = Column(Float)
+    NRS = Column(Float)
     TPA = Column(Integer)
     DAM = Column(Float)
