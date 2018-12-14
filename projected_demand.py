@@ -23,7 +23,7 @@ def populate_qtde():
             ],
             else_=4),
             func.year(Order.DATAPED),
-        func.count(Order.IDPEDIDO)
+            func.sum(Order.QTDE)
         ).group_by(
             case([
             (func.month(Order.DATAPED) < 4, 1),
@@ -41,8 +41,7 @@ def populate_qtde():
             session.add(time)
             session.commit()
         time = session.query(TimeDimension).filter(TimeDimension.TRIMESTRE == time.TRIMESTRE, TimeDimension.ANO == time.ANO).first()
-        order = ProjectedDemandFact(IDPROD = demand[0], IDTEMPO = time.ID, QTDE = float(demand[3]))
-        session.add(order)
+        order = engine.execute(insert(ProjectedDemandFact).values(IDPROD = demand[0], IDTEMPO = time.ID, QTDE = float(demand[3])).on_duplicate_key_update(QTDE = float(demand[3])))
     session.commit()
 
 def projected_demand():
