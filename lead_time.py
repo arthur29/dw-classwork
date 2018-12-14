@@ -38,7 +38,8 @@ def lead_time():
                         min = 10
                         max = 12
 
-                provision_time = session.query(Provision.DATACOMP, Provision.DATAARREC).filter(func.month(Provision.DATACOMP) >= min, func.month(Provision.DATACOMP) <= max, Provision.IDPROD == product[0]).all()
+                query = session.query(Provision.DATACOMP, Provision.DATAARREC).filter(func.month(Provision.DATACOMP) >= min, func.month(Provision.DATACOMP) <= max, Provision.IDPROD == product[0])
+                provision_time = query.all()
 
                 total_time = 0
                 for item in provision_time:
@@ -50,7 +51,7 @@ def lead_time():
                     session.commit()
                 time = session.query(TimeDimension.ID).filter(TimeDimension.TRIMESTRE == trimester, TimeDimension.ANO == year).first()
 
-                statement = insert(InventoryControlFact). values(IDPROD = product[0], TPA = total_time, IDTEMPO = time[0]).on_duplicate_key_update(TPA = total_time)
+                statement = insert(InventoryControlFact). values(IDPROD = product[0], TPA = (total_time / 3.0), IDTEMPO = time[0]).on_duplicate_key_update(TPA = total_time / 3.0)
                 engine.execute(statement)
                 session.commit()
 lead_time()
