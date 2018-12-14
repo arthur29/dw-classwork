@@ -1,4 +1,4 @@
-.PHONY: create migrate populate real_demand projected_demand lead_time security_level
+.PHONY: create migrate populate real_demand projected_demand lead_time security_level dam ressuply_level
 
 ## all: create and run all targets
 all: populate real_demand projected_demand lead_time
@@ -11,9 +11,9 @@ migrate: create
 ## populate: read PRODUTO.csv and use it to populate tables
 populate: migrate
 	@python3 populate.py
-## total_orders: populate total_orders DW
-total_orders:
-	@python3 real_demand.py
+## total_order: populate total_orders DW
+total_order:
+	@python3 total_order.py
 ## projected_demand: populate the projected_demand DW
 projected_demand:
 	@python3 projected_demand.py
@@ -23,6 +23,12 @@ lead_time:
 ## security_level: populate security_level column in InventoryControl DW
 security_level: lead_time
 	@python3 security_level.py
+## dam: populate the DAM column in InventoryControl DW
+dam:
+	@python3 DAM.py
+## ressuply_level: populate the NRS in INventoryControl DW
+ressuply_level:
+	@python3 ressuply_level.py
 ## help: show this message
 help:
 	@echo "DW work:"
