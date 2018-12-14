@@ -6,7 +6,8 @@ select
     dpd.DEMANDA_PROJETADA as 'Demanda Projetada',
     dci.NS as 'Nivel de Seguranca',
     dci.NRS as 'Nivel de Ressuprimento',
-    dci.TPA as 'Tempo de Procura e Aquisição'
+    dci.TPA as 'Tempo de Procura e Aquisição',
+    dci.DAM as 'Desvio Absoluto Medio'
 
 FROM
 	PRODUTO p
